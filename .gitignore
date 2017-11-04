@@ -66,5 +66,7 @@ project/plugins/project/
 .cache
 .lib/
 
+.idea
+
 /db/
 /**/*.iml
