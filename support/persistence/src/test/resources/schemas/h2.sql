@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS snapshots (
     timestamp BIGINT NOT NULL,
     deleted CHAR DEFAULT 'N',
     snapshot BLOB NOT NULL,
-    PRIMARY KEY(persistenceId, sequenceNr)
+    PRIMARY KEY(persistenceId, sequenceNr, timestamp)
 )

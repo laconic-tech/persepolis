@@ -36,14 +36,22 @@ class JdbcSnapshotRepository(serialization: Serialization) {
 
   def save(metadata: SnapshotMetadata, snapshot: Any): Unit =
     DB localTx { implicit session =>
-      sql"""INSERT INTO snapshots (persistenceId, sequenceNr, timestamp, deleted, snapshot)
-            VALUES (
-             ${metadata.persistenceId},
-             ${metadata.sequenceNr},
-             ${metadata.timestamp},
-             'N',
-             ${serializer.serialize(Snapshot(snapshot))}
-            )
+      sql"""UPDATE snapshots
+            SET deleted = 'Y'
+            WHERE persistenceId = ${metadata.persistenceId}
+              AND sequenceNr    = ${metadata.sequenceNr}
+              AND timestamp     < ${metadata.timestamp}"""
+          .update()
+          .apply()
+
+       sql"""INSERT INTO snapshots (persistenceId, sequenceNr, timestamp, deleted, snapshot)
+             VALUES (
+               ${metadata.persistenceId},
+               ${metadata.sequenceNr},
+               ${metadata.timestamp},
+               'N',
+               ${serializer.serialize(Snapshot(snapshot))}
+             );
          """
         .update()
         .apply()
@@ -55,7 +63,7 @@ class JdbcSnapshotRepository(serialization: Serialization) {
                SET deleted = 'Y'
              WHERE persistenceId = ${metadata.persistenceId}
                AND sequenceNr    = ${metadata.sequenceNr}
-               AND timestamp     = ${metadata.timestamp}
+               AND timestamp     = COALESCE(${if (metadata.timestamp == 0L) None else Some(metadata.timestamp)}, timestamp)
         """
         .update()
         .apply()

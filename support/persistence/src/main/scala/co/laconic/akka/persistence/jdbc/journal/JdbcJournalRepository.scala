@@ -35,6 +35,7 @@ class JdbcJournalRepository(serialization: Serialization) {
 
   def read(persistenceId: String, fromSequenceNr: Long, toSequenceNr: Long, max: Long): Seq[PersistentRepr] = {
     DB localTx { implicit session =>
+      val fetchSize = if (max == Long.MaxValue || max > Int.MaxValue) Int.MaxValue else max.toInt
       sql"""SELECT event, deleted
               FROM journal
              WHERE persistenceId = $persistenceId
@@ -42,10 +43,13 @@ class JdbcJournalRepository(serialization: Serialization) {
                AND sequenceNr   <= $toSequenceNr
           ORDER BY sequenceNr ASC
          """
-        .map(rs => serializer.deserialize(rs.blob("event").getBinaryStream).update(deleted = rs.string("deleted") == "Y"))
-        .fetchSize(Integer.MAX_VALUE)
-        .toList()
-        .apply()
+        .map(rs =>
+          serializer.deserialize(rs.blob("event").getBinaryStream).update(deleted = rs.string("deleted") == "Y")
+        )
+      .toTraversable()
+      .apply()
+      .take(fetchSize)
+      .toSeq
     }
   }
 

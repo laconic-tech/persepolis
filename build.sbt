@@ -25,6 +25,7 @@ lazy val persistence = (project in file("support/persistence"))
       // test dependencies
       Dependencies.scalatest,
       Dependencies.akkaTestKit,
+      Dependencies.akkaPersistenceTck,
       "com.h2database" % "h2" % "1.4.196" % "test"
     ))
 

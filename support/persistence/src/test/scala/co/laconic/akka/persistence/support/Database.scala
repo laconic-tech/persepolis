@@ -5,15 +5,22 @@ import scalikejdbc._
 import scalikejdbc.config.DBs
 
 trait Database {
-  // setup and create database
-  DBs.setupAll()
 
-  // print out generated queries
-  GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
-    enabled = true, singleLineMode = true, logLevel = 'DEBUG
-  )
+  Database.initialise()
+}
 
-  DB localTx { implicit session =>
-    session.executeUpdate(Resource("schemas/h2.sql").mkString)
+object Database {
+  def initialise(): Unit = {
+    // setup and create database
+    DBs.setupAll()
+
+    // print out generated queries
+    GlobalSettings.loggingSQLAndTime = LoggingSQLAndTimeSettings(
+      enabled = true, singleLineMode = true, logLevel = 'DEBUG
+    )
+
+    DB localTx { implicit session =>
+      session.executeUpdate(Resource("schemas/h2.sql").mkString)
+    }
   }
 }
