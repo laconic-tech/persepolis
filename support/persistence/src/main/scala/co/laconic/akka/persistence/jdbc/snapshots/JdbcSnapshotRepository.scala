@@ -17,12 +17,12 @@ class JdbcSnapshotRepository(serialization: Serialization) {
       sql"""SELECT persistenceId, sequenceNr, timestamp, snapshot
               FROM snapshots
               WHERE persistenceId = $persistenceId
-                AND sequenceNr   >= ISNULL($fromSequenceNr, sequenceNr)
-                AND sequenceNr   <= ISNULL($toSequenceNr, sequenceNr)
-                AND timestamp    >= ISNULL($fromTimestamp, timestamp)
-                AND timestamp    <= ISNULL($toTimestamp, timestamp)
-                AND deleted = 'N'
-              ORDER BY sequenceNr DESC
+                AND sequenceNr   >= COALESCE($fromSequenceNr, sequenceNr)
+                AND sequenceNr   <= COALESCE($toSequenceNr,   sequenceNr)
+                AND timestamp    >= COALESCE($fromTimestamp,   timestamp)
+                AND timestamp    <= COALESCE($toTimestamp,     timestamp)
+                AND deleted       = 'N'
+           ORDER BY sequenceNr DESC
         """
         .map { rs => rs
           SelectedSnapshot(
@@ -67,10 +67,10 @@ class JdbcSnapshotRepository(serialization: Serialization) {
       sql"""UPDATE snapshots
                SET deleted = 'Y'
              WHERE persistenceId = $persistenceId
-               AND sequenceNr   >= ISNULL($fromSequenceNr, sequenceNr)
-               AND sequenceNr   <= ISNULL($toSequenceNr, sequenceNr)
-               AND timestamp    >= ISNULL($fromTimestamp, timestamp)
-               AND timestamp    <= ISNULL($toTimestamp, timestamp)
+               AND sequenceNr   >= COALESCE($fromSequenceNr, sequenceNr)
+               AND sequenceNr   <= COALESCE($toSequenceNr,   sequenceNr)
+               AND timestamp    >= COALESCE($fromTimestamp,   timestamp)
+               AND timestamp    <= COALESCE($toTimestamp,     timestamp)
         """
         .update()
         .apply()

@@ -37,11 +37,11 @@ class JdbcJournalRepository(serializer: Serialization) {
   def read(persistenceId: String, fromSequenceNr: Long, toSequenceNr: Long, max: Long): Seq[PersistentRepr] = {
     DB localTx { implicit session =>
       sql"""SELECT event, deleted
-            FROM journal
-            WHERE persistenceId = $persistenceId
-              AND sequenceNr >= $fromSequenceNr
-              AND sequenceNr <= $toSequenceNr
-            ORDER BY sequenceNr ASC
+              FROM journal
+             WHERE persistenceId = $persistenceId
+               AND sequenceNr   >= $fromSequenceNr
+               AND sequenceNr   <= $toSequenceNr
+          ORDER BY sequenceNr ASC
          """
         .map(rs => deserialize(rs.blob("event").getBinaryStream).update(deleted = rs.string("deleted") == "Y"))
         .fetchSize(Integer.MAX_VALUE)
@@ -53,11 +53,11 @@ class JdbcJournalRepository(serializer: Serialization) {
   def getHighestSequenceNr(persistenceId: String, fromSequenceNr: Long): Long = {
     DB localTx { implicit session =>
       sql"""SELECT ISNULL(MAX(sequenceNr), 0) as sequenceNr
-            FROM journal
-            WHERE persistenceId = $persistenceId
+              FROM journal
+             WHERE persistenceId = $persistenceId
          """
         .map(_.long("sequenceNr"))
-        .single()
+        .headOption()
         .apply()
         .getOrElse(0) // if no results found then the maximum is 0
     }
@@ -66,9 +66,9 @@ class JdbcJournalRepository(serializer: Serialization) {
   def delete(persistenceId: String, toSequenceNr: Long): Unit = {
     DB localTx { implicit session =>
       sql"""UPDATE journal
-            SET deleted = 'Y'
-            WHERE persistenceId = $persistenceId
-              AND sequenceNr <= $toSequenceNr
+               SET deleted       = 'Y'
+             WHERE persistenceId = $persistenceId
+               AND sequenceNr   <= $toSequenceNr
          """
         .update()
         .apply()
