@@ -1,6 +1,6 @@
 package co.laconic.akka.persistence.jdbc.journal
 
-import akka.persistence.{AtomicWrite, PersistentRepr}
+import akka.persistence._
 import akka.serialization.Serialization
 import co.laconic.akka.persistence.jdbc.serialization.Serializer
 import scalikejdbc._
