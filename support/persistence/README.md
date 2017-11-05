@@ -25,7 +25,7 @@ Here is a sample schema based on an H2 database, you are free to add other field
      timestamp BIGINT NOT NULL,
      deleted CHAR DEFAULT 'N',
      snapshot BLOB NOT NULL,
-     PRIMARY KEY(persistenceId, sequenceNr)
+     PRIMARY KEY(persistenceId, sequenceNr, timestamp)
  )
 ```
 
@@ -35,13 +35,13 @@ In your `application.conf`, define the following
 akka {
   persistence {
     journal {
-      plugin = "jdbc-journal"
-      auto-start-journals = ["jdbc-journal"]
+      plugin = "co.laconic.jdbc.journal"
+      auto-start-journals = ["co.laconic.jdbc.journal"]
     }
 
     snapshot-store {
-      plugin = "jdbc-snapshot"
-      auto-start-snapshot-stores = ["jdbc-snapshot"]
+      plugin = "co.laconic.jdbc.snapshot"
+      auto-start-snapshot-stores = ["co.laconic.jdbc.snapshot"]
     }
   }
 }
