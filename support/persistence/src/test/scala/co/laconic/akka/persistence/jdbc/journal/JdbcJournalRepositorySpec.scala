@@ -28,7 +28,7 @@ class JdbcJournalRepositorySpec extends TestKit(ActorSystem("JdbcJournalSpec"))
       )
 
       // writing should be successful
-      target.write(persistenceId, events) should be(a[Success[Unit]])
+      target.write(persistenceId, events) should be(a[Success[_]])
       // we can read the events
       target.read(persistenceId, 0, 100, 100) should have size 3
       // the max sequenceNr should be 3

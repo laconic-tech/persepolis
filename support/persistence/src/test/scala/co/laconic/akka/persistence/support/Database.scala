@@ -1,9 +1,8 @@
 package co.laconic.akka.persistence.support
 
+import co.laconic.common.io._
 import scalikejdbc._
 import scalikejdbc.config.DBs
-
-import scala.io.Source
 
 trait Database {
   // setup and create database
@@ -15,6 +14,6 @@ trait Database {
   )
 
   DB localTx { implicit session =>
-    session.executeUpdate(Source.fromResource("schemas/h2.sql").mkString)
+    session.executeUpdate(Resource("schemas/h2.sql").mkString)
   }
 }
