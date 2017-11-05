@@ -1,9 +1,7 @@
 package co.laconic.akka.persistence.jdbc.snapshots
 
-import java.io.InputStream
-
-import akka.persistence.serialization.Snapshot
 import akka.persistence._
+import akka.persistence.serialization.Snapshot
 import akka.serialization.Serialization
 import co.laconic.akka.persistence.jdbc.serialization.Serializer
 import scalikejdbc._

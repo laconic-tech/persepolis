@@ -1,16 +1,13 @@
 package co.laconic.akka.persistence.jdbc.journal
 
-import java.io.InputStream
-
 import akka.persistence.PersistentRepr
-import akka.persistence.serialization.Snapshot
 import akka.serialization.Serialization
 import co.laconic.akka.persistence.jdbc.serialization.Serializer
+import scalikejdbc._
 
 import scala.collection.immutable
 import scala.language.postfixOps
 import scala.util._
-import scalikejdbc._
 
 class JdbcJournalRepository(serialization: Serialization) {
 
