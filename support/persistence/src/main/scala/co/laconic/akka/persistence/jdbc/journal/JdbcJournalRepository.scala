@@ -3,16 +3,18 @@ package co.laconic.akka.persistence.jdbc.journal
 import java.io.InputStream
 
 import akka.persistence.PersistentRepr
+import akka.persistence.serialization.Snapshot
 import akka.serialization.Serialization
+import co.laconic.akka.persistence.jdbc.serialization.Serializer
 
 import scala.collection.immutable
 import scala.language.postfixOps
 import scala.util._
 import scalikejdbc._
 
-import co.laconic.common.io._
+class JdbcJournalRepository(serialization: Serialization) {
 
-class JdbcJournalRepository(serializer: Serialization) {
+  private val serializer = Serializer(serialization, classOf[PersistentRepr])
 
   def write(persistenceId: String, payload: immutable.Seq[PersistentRepr]): Try[Unit] = {
     Try {
@@ -20,7 +22,7 @@ class JdbcJournalRepository(serializer: Serialization) {
           'persistenceId -> event.persistenceId,
           'sequenceNr -> event.sequenceNr,
           'deleted -> event.deleted,
-          'event -> serialize(event)
+          'event -> serializer.serialize(event)
         )
       )
 
@@ -43,7 +45,7 @@ class JdbcJournalRepository(serializer: Serialization) {
                AND sequenceNr   <= $toSequenceNr
           ORDER BY sequenceNr ASC
          """
-        .map(rs => deserialize(rs.blob("event").getBinaryStream).update(deleted = rs.string("deleted") == "Y"))
+        .map(rs => serializer.deserialize(rs.blob("event").getBinaryStream).update(deleted = rs.string("deleted") == "Y"))
         .fetchSize(Integer.MAX_VALUE)
         .toList()
         .apply()
@@ -74,12 +76,4 @@ class JdbcJournalRepository(serializer: Serialization) {
         .apply()
     }
   }
-
-  private def serialize(persistentRepr: PersistentRepr): Array[Byte] =
-    serializer.serialize(persistentRepr).get
-
-  private def deserialize(inputStream: InputStream): PersistentRepr =
-    serializer
-      .deserialize[PersistentRepr](inputStream.toByteArray, classOf[PersistentRepr])
-      .get
 }
