@@ -1,33 +1,32 @@
 package co.laconic.akka.persistence.jdbc.snapshots
 
-import java.io.InputStream
-
-import akka.persistence.serialization.Snapshot
 import akka.persistence._
+import akka.persistence.serialization.Snapshot
 import akka.serialization.Serialization
-
+import co.laconic.akka.persistence.jdbc.serialization.Serializer
 import scalikejdbc._
 
-import co.laconic.common.io._
 
 class JdbcSnapshotRepository(serialization: Serialization) {
+
+  private val serializer = Serializer(serialization, classOf[Snapshot])
 
   def load(persistenceId: String, fromSequenceNr: Option[Long], toSequenceNr: Option[Long], fromTimestamp: Option[Long], toTimestamp: Option[Long]): Option[SelectedSnapshot] =
     DB localTx { implicit session =>
       sql"""SELECT persistenceId, sequenceNr, timestamp, snapshot
               FROM snapshots
               WHERE persistenceId = $persistenceId
-                AND sequenceNr   >= ISNULL($fromSequenceNr, sequenceNr)
-                AND sequenceNr   <= ISNULL($toSequenceNr, sequenceNr)
-                AND timestamp    >= ISNULL($fromTimestamp, timestamp)
-                AND timestamp    <= ISNULL($toTimestamp, timestamp)
-                AND deleted = 'N'
-              ORDER BY sequenceNr DESC
+                AND sequenceNr   >= COALESCE($fromSequenceNr, sequenceNr)
+                AND sequenceNr   <= COALESCE($toSequenceNr,   sequenceNr)
+                AND timestamp    >= COALESCE($fromTimestamp,   timestamp)
+                AND timestamp    <= COALESCE($toTimestamp,     timestamp)
+                AND deleted       = 'N'
+           ORDER BY sequenceNr DESC
         """
         .map { rs => rs
           SelectedSnapshot(
             SnapshotMetadata(rs.string("persistenceId"), rs.long("sequenceNr"), rs.long("timestamp")),
-            deserialize(rs.blob("snapshot").getBinaryStream)
+            serializer.deserialize(rs.blob("snapshot").getBinaryStream).data
           )
         }
         .fetchSize(1)
@@ -43,7 +42,7 @@ class JdbcSnapshotRepository(serialization: Serialization) {
              ${metadata.sequenceNr},
              ${metadata.timestamp},
              'N',
-             ${serialize(snapshot)}
+             ${serializer.serialize(Snapshot(snapshot))}
             )
          """
         .update()
@@ -67,23 +66,12 @@ class JdbcSnapshotRepository(serialization: Serialization) {
       sql"""UPDATE snapshots
                SET deleted = 'Y'
              WHERE persistenceId = $persistenceId
-               AND sequenceNr   >= ISNULL($fromSequenceNr, sequenceNr)
-               AND sequenceNr   <= ISNULL($toSequenceNr, sequenceNr)
-               AND timestamp    >= ISNULL($fromTimestamp, timestamp)
-               AND timestamp    <= ISNULL($toTimestamp, timestamp)
+               AND sequenceNr   >= COALESCE($fromSequenceNr, sequenceNr)
+               AND sequenceNr   <= COALESCE($toSequenceNr,   sequenceNr)
+               AND timestamp    >= COALESCE($fromTimestamp,   timestamp)
+               AND timestamp    <= COALESCE($toTimestamp,     timestamp)
         """
         .update()
         .apply()
     }
-
-  private def serialize(snapshot: Any): Array[Byte] =
-    serialization
-      .serialize(Snapshot(snapshot))
-      .get
-
-  private def deserialize(is: InputStream): Any =
-    serialization
-      .deserialize(is.toByteArray, classOf[Snapshot])
-      .map(_.data)
-      .get
 }

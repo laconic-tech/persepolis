@@ -17,8 +17,10 @@ class JdbcSnapshotStore extends SnapshotStore {
       Try {
         snapshots.load(
           persistenceId,
-          toOption(criteria.minSequenceNr), toOption(criteria.maxSequenceNr),
-          toOption(criteria.minTimestamp), toOption(criteria.maxTimestamp)
+          toOption(criteria.minSequenceNr),
+          toOption(criteria.maxSequenceNr),
+          toOption(criteria.minTimestamp),
+          toOption(criteria.maxTimestamp)
         )
       }
     }
@@ -42,8 +44,10 @@ class JdbcSnapshotStore extends SnapshotStore {
       Try {
         snapshots.delete(
           persistenceId,
-          toOption(criteria.minSequenceNr), toOption(criteria.maxSequenceNr),
-          toOption(criteria.minTimestamp), toOption(criteria.maxTimestamp)
+          toOption(criteria.minSequenceNr),
+          toOption(criteria.maxSequenceNr),
+          toOption(criteria.minTimestamp),
+          toOption(criteria.maxTimestamp)
         )
       }
     }

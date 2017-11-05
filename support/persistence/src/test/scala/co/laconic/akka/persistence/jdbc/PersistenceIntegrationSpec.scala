@@ -60,7 +60,7 @@ object PersistenceIntegrationSpec {
 class PersistenceIntegrationSpec extends TestKit(ActorSystem("PersistenceIntegrationSpec"))
   with ImplicitSender
   with WordSpecLike
-  with DB {
+  with Database {
 
   "A persistent calculator" should {
     "be able to recover it's state after a restart" in {
