@@ -29,10 +29,34 @@ lazy val persistence = (project in file("support/persistence"))
       "com.h2database" % "h2" % "1.4.196" % "test"
     ))
 
-// root project
+lazy val http = (project in file("support/http"))
+    .dependsOn(common)
+    .settings(commonSettings)
+    .settings(libraryDependencies ++= Seq(
+      Dependencies.akkaHttp,
+      Dependencies.akka,
+      Dependencies.akkaStreams,
+      // testing
+      Dependencies.scalatest,
+      Dependencies.akkaTestKit
+    ))
+
+// services
+lazy val metadataService = (project in file("services/metadata"))
+    .settings(commonSettings)
+    .dependsOn(common)
+    .dependsOn(persistence)
+    .dependsOn(http)
+
+// root
 lazy val root = project.in(rootDir)
     .settings(commonSettings)
     .aggregate(
+      // support
       common,
-      persistence
+      persistence,
+      http,
+
+      // services
+      metadataService
     )
