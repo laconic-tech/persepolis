@@ -6,13 +6,13 @@ import akka.actor.ActorSystem
 import akka.persistence.{SelectedSnapshot, SnapshotMetadata}
 import akka.serialization.SerializationExtension
 import akka.testkit.TestKit
-import co.laconic.akka.persistence.support.DB
+import co.laconic.akka.persistence.support.Database
 import org.scalatest.{Matchers, WordSpecLike}
 
 class JdbcSnapshotRepositorySpec extends TestKit(ActorSystem("JdbcSnapshotStoreSpec"))
   with WordSpecLike
   with Matchers
-  with DB {
+  with Database {
 
   val target = new JdbcSnapshotRepository(SerializationExtension(system))
 

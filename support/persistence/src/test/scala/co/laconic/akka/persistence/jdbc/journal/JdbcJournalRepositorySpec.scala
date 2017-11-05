@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.persistence.PersistentRepr
 import akka.serialization.SerializationExtension
 import akka.testkit.TestKit
-import co.laconic.akka.persistence.support.DB
+import co.laconic.akka.persistence.support.Database
 import org.scalatest.{Matchers, WordSpecLike}
 
 import scala.collection.immutable
@@ -13,7 +13,7 @@ import scala.util.Success
 class JdbcJournalRepositorySpec extends TestKit(ActorSystem("JdbcJournalSpec"))
   with WordSpecLike
   with Matchers
-  with DB {
+  with Database {
 
   var target = new JdbcJournalRepository(SerializationExtension(system))
 
