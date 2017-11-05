@@ -29,7 +29,9 @@ lazy val persistence = (project in file("support/persistence"))
     ))
 
 // root project
-lazy val root = project.in(rootDir).aggregate(
-  common,
-  persistence
-)
+lazy val root = project.in(rootDir)
+    .settings(commonSettings)
+    .aggregate(
+      common,
+      persistence
+    )
