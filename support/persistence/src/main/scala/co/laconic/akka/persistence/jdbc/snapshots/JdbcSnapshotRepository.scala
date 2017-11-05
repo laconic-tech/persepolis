@@ -23,7 +23,7 @@ class JdbcSnapshotRepository(serialization: Serialization) {
                 AND deleted       = 'N'
            ORDER BY sequenceNr DESC
         """
-        .map { rs => rs
+        .map { rs =>
           SelectedSnapshot(
             SnapshotMetadata(rs.string("persistenceId"), rs.long("sequenceNr"), rs.long("timestamp")),
             serializer.deserialize(rs.blob("snapshot").getBinaryStream).data

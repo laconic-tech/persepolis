@@ -1,1 +1,1 @@
-name := "persepolis.persistence"
+name := "support.jdbc.akka.persistence"

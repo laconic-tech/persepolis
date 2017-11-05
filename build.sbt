@@ -1,25 +1,30 @@
 name := "persepolis"
 version := "0.1"
-scalaVersion := "2.11.11"
 
 // common properties
 lazy val rootDir = file(".")
+lazy val commonSettings = Seq(
+  organization := "co.uk.laconic",
+  version := "0.1",
+  scalaVersion := "2.11.11",
+  javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
-lazy val common = project in file("support/common")
+)
+
+lazy val common = (project in file("support/common"))
+  .settings(commonSettings)
 
 // modules
 lazy val persistence = (project in file("support/persistence"))
     .dependsOn(common)
+    .settings(commonSettings)
     .settings(libraryDependencies ++= Seq(
-      // akka dependencies
-      "com.typesafe.akka" %% "akka-persistence" % "2.5.4",
-      // data access
-      "org.scalikejdbc" %% "scalikejdbc" % "3.1.0",
-      "org.scalikejdbc" %% "scalikejdbc-config"  % "3.1.0",
-
+      Dependencies.akkaPersistence,
+      Dependencies.scalikeJdbc,
+      Dependencies.scalikeJdbcConfig,
       // test dependencies
-      "org.scalatest" %% "scalatest" % "3.0.4" % "test",
-      "com.typesafe.akka" %% "akka-testkit" % "2.5.4" % "test",
+      Dependencies.scalatest,
+      Dependencies.akkaTestKit,
       "com.h2database" % "h2" % "1.4.196" % "test"
     ))
 
